@@ -1,13 +1,15 @@
 package domain;
 
+import java.time.LocalDate;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import files.JsonUtiles;
+
 
 //import javax.rmi.CORBA.Tie;
 
@@ -23,6 +25,7 @@ public class GYM {
 	ListaGenerica<Turno> listaTurnos;
 	ListaGenerica<Persona> listaClienteConDeudas;
 	Tienda tienda;
+	Contabilidad contabilidad;
 
 	// CONSTRUCTOR
 
@@ -33,6 +36,7 @@ public class GYM {
 		listaTurnos = new ListaGenerica<>();
 		listaClienteConDeudas = new ListaGenerica<>();
 		tienda = new Tienda(new ArrayList<Producto>());
+		contabilidad = new Contabilidad("GYM");
 	}
 
 	//region AGREGAR
@@ -71,78 +75,71 @@ public class GYM {
 
 	//region BORRAR
 
-	public void BorrarPersona() {
+
+	public void Borrar_Profesor() {
+
 		Scanner scanner = new Scanner(System.in);
 
 		int rta = 0;
 		int dni = 0;
-		do {
-			scanner.nextLine();
-			try {
-				System.out.println("Desea borrar un profesor o un cliente? 1: Profesor 2: Cliente ");
-				rta = scanner.nextInt();
-			} catch (InputMismatchException e) {
-				System.out.println("Debe ingresar 1 o 2");
-			} catch (Exception e) {
-				e.getMessage();
-			}
-			if (rta == 1) {
-				ListarProfesor();
-				scanner.nextLine();
-				try {
-					System.out.println("Ingrese Dni del profesor a borrar ");
-					dni = scanner.nextInt();
-				} catch (InputMismatchException e) {
-					System.out.println("Debe ingresar un DNI");
-				} catch (Exception e) {
-					e.getMessage();
-				}
-				if (listaProfesor.lista != null) {
-					boolean existe = false;
-					for (Persona profesor : listaProfesor.lista) {
-						if (profesor.getDni() == dni) {
-							listaProfesor.lista.remove(profesor);
-							System.out.println("Profesor Borrado");
-							existe=true;
-							break; /// Corto el ciclo una vez encontrado
-						}
-					}if (!existe) {System.out.println("No existe un profesor con ese DNI");}
 
+		ListarProfesor();
+		scanner.nextLine();
+		try {
+			System.out.println("Ingrese Dni del profesor a borrar ");
+			dni = scanner.nextInt();
+		} catch (InputMismatchException e) {
+			System.out.println("Debe ingresar un DNI");
+		} catch (Exception e) {
+			e.getMessage();
+		}
+		if (listaProfesor.lista != null) {
+			boolean existe = false;
+			for (Persona profesor : listaProfesor.lista) {
+				if (profesor.getDni() == dni) {
+					listaProfesor.lista.remove(profesor);
+					System.out.println("Profesor Borrado");
+					existe=true;
+					break; /// Corto el ciclo una vez encontrado
 				}
-			}
-			if (rta == 2) {
-				ListarCliente();
-				scanner.nextLine();
-				try {
-					System.out.println("Ingrese Dni del Cliente a borrar ");
-					dni = scanner.nextInt();
-				} catch (InputMismatchException e) {
-					System.out.println("Debe ingresar un DNI");
-				} catch (Exception e) {
-					e.getMessage();
-				}
-				if (listaCliente.lista != null) {
-					boolean existe = false;
-					for (Persona cliente : listaCliente.lista) {
-						if (cliente.getDni() == dni) {
-							listaCliente.lista.remove(cliente);
-							System.out.println("Cliente Borrado");
-							existe=true;
-							break;
-						}
+			}if (!existe) {System.out.println("No existe un profesor con ese DNI");} }
 
-					}if (!existe){ System.out.println("No existe un cliente con ese DNI"); }
-				}
-
-			}
-		} while (rta != 1 && rta != 2);
 	}
 
-	public void BuscarProfesorPorDNI() {
+	public void Borrar_Cliente() {
+
+		Scanner scanner = new Scanner(System.in);
+		int rta = 0;
+		int dni = 0;
+
+		ListarCliente();
+		scanner.nextLine();
+		try {
+			System.out.println("Ingrese Dni del cliente a borrar ");
+			dni = scanner.nextInt();
+		} catch (InputMismatchException e) {
+			System.out.println("Debe ingresar un DNI");
+		} catch (Exception e) {
+			e.getMessage();
+		}
+		if (listaCliente.lista != null) {
+			boolean existe = false;
+			for (Persona profesor : listaCliente.lista) {
+				if (profesor.getDni() == dni) {
+					listaCliente.lista.remove(profesor);
+					System.out.println("Cliente Borrado");
+					existe=true;
+					break; /// Corto el ciclo una vez encontrado
+				}
+			}if (!existe) {System.out.println("No existe un cliente con ese DNI");} }
+
+
+	}
+
+	public Persona BuscarProfesorPorDNI() {
 		int dni = 0;
 		Scanner scanner = new Scanner(System.in);
 		while (dni == 0) {
-			scanner.nextLine();
 			try {
 				System.out.println("Ingrese el DNI del profesor a buscar");
 				dni = scanner.nextInt();
@@ -152,16 +149,18 @@ public class GYM {
 				e.getMessage();
 			}
 
+			scanner.nextLine();
+
 			// creo que no va a retornar la lista
 			for (Persona profesor : listaProfesor.lista) {
 				if (profesor.getDni() == dni) {
 					System.out.println(profesor);
-					break;
-				} else {
-					System.out.println("No existe un profesor con ese DNI");
+					return profesor;
 				}
 			}
 		}
+		System.out.println("No existe un profesor con ese DNI");
+		return null;
 	}
 
 	public Persona BuscarClientePorDNI() {
@@ -190,6 +189,17 @@ public class GYM {
 		System.out.println("No existe un cliente con ese DNI");
 		return null;
 	}
+
+
+		/*
+       for (i=0;i<=turno.getClientes().size();i++){					//y dentro de cada turno recorro su arreglo
+		if (turno.getClientes().get(i).getDni()==cliente.getDni()){ //de clientes
+			horario=turno.getHorario();
+
+		}		*/
+
+
+
 
 
 	//endregion
@@ -238,6 +248,17 @@ public class GYM {
 					return false;
 				} else {
 					e.AgregarCliente(persona);
+
+					//Funcion de contabilidad
+					//casteo persona para tratarlo como cliente
+					Cliente cliente = (Cliente) persona;
+					//Si el cliente no pago la cuota, al inscribirse al turno la paga. Necesitamos esta comprobacion
+					//porque sino cada vez que se inscribe el mismo cliente a un turno va a tener que pagar
+					if(!cliente.getPagoCuota()) {
+						//Ahora si pago la cuota dependiendo de la frecuencia de pago que eligio el cliente
+						contabilidad.agregar(contabilidad.precios.get(cliente.getFrecuenciaPago()));
+						cliente.setPagoCuota(true);
+					}
 					return true;
 				}
 			}
@@ -256,13 +277,46 @@ public class GYM {
 	{
 		for (Turno e : listaTurnos.lista) {
 
-			if (e.getEstaLleno()) {
 				if (e.getHorario() == horarioActual) {
 					e.BorrarCliente(persona);
 				}
-			}
+
 		}
 	}
+
+	public int Elegir_Turno (){
+		int horario=0;
+		Ver_Turnos();
+		Scanner scanner = new Scanner(System.in);
+
+		while(horario==0) {
+			try {
+				System.out.println("Ingrese el horario del turno elegido");
+				horario = scanner.nextInt();
+
+			} catch (InputMismatchException e) {
+				System.out.println("Debe ingresar un numero");
+			}
+		}
+
+	return horario;}
+	
+	public int Buscar_Turno_Por_Cliente (Persona clienteBuscado)  ///recibe la persona y te dice en que turno esta
+	{
+		int horario=0;
+		int i=0;
+
+		for (Turno turno: listaTurnos.lista) {                              //recorro el arreglo de turnos
+			for (Persona cliente: turno.getClientes()){                     //recorro el arreglo de personas en
+																			// cada turno
+				if(cliente.getDni()==clienteBuscado.getDni()){ horario= turno.getHorario();
+					return horario;
+					}													//freno ambos ciclos una vez encontrado
+			} }
+
+		System.out.println("La persona no se encuentra inscripta en ningun horario");
+
+		return horario;}
 
 	//endregion
 
@@ -509,43 +563,70 @@ public class GYM {
 	public JSONArray Levantar_Json_Cliente(){
 		JSONArray listArray = new JSONArray();
 		JsonUtiles utiles = new JsonUtiles();
-		JSONObject jsonObject = new JSONObject();
 
-		for (Persona e : listaCliente.lista) {
-			listArray.put(e.getFormatoJSON());
+		try {
+			for (Persona e : listaCliente.lista) {
+				listArray.put(e.getFormatoJSON());
+			}
+		}catch (JSONException e1) {
+			e1.printStackTrace();
 		}
+
 		String respuesta = listArray.toString();
-		JSONArray arregloJson = new JSONArray(respuesta);
-		utiles.grabar(arregloJson);
-		return arregloJson;
+		try {
+			JSONArray arregloJson = new JSONArray(respuesta);
+			utiles.grabar(arregloJson);
+			return arregloJson;
+		}catch (JSONException e1){
+			e1.printStackTrace();
+		}
+		return null;
 	}
 
 	public JSONArray Levantar_Json_Profesor(){
 		JSONArray listArray = new JSONArray();
 		JsonUtiles utiles = new JsonUtiles();
-		JSONObject jsonObject = new JSONObject();
 
-		for (Persona e : listaProfesor.lista) {
-			listArray.put(e.getFormatoJSON());
+		try {
+			for (Persona e : listaProfesor.lista) {
+				listArray.put(e.getFormatoJSON());
+			}
+		}catch (JSONException e1) {
+				e1.printStackTrace();
 		}
+
 		String respuesta = listArray.toString();
-		JSONArray arregloJson = new JSONArray(respuesta);
-		utiles.grabar(arregloJson);
-		return arregloJson;
+		try {
+			JSONArray arregloJson = new JSONArray(respuesta);
+			utiles.grabar(arregloJson);
+			return arregloJson;
+		}catch (JSONException e1){
+			e1.printStackTrace();
+		}
+		return null;
 	}
 
 	public JSONArray Levantar_Json_Turnos(){
 		JSONArray listArray = new JSONArray();
 		JsonUtiles utiles = new JsonUtiles();
 		JSONObject jsonObject = new JSONObject();
-
-		for (Turno e : listaTurnos.lista) {
-			listArray.put(e.getFormatoJSON());
+		try {
+			for (Turno e : listaTurnos.lista) {
+				listArray.put(e.getFormatoJSON());
+			}
+		}catch (JSONException e1) {
+			e1.printStackTrace();
 		}
+
 		String respuesta = listArray.toString();
-		JSONArray arregloJson = new JSONArray(respuesta);
-		utiles.grabar(arregloJson);
-		return arregloJson;
+		try {
+			JSONArray arregloJson = new JSONArray(respuesta);
+			utiles.grabar(arregloJson);
+			return arregloJson;
+		}catch (JSONException e1){
+			e1.printStackTrace();
+		}
+		return null;
 	}
 
 	
@@ -553,9 +634,9 @@ public class GYM {
 {
 	JSONArray listaArray = new JSONArray();
 	JsonUtiles utiles = new JsonUtiles();
-	listaArray.put(listaCliente.Levantar_Json_Cliente());
-	listaArray.put(listaProfesor.Levantar_Json_Profesor());
-	listaArray.put(listaTurnos.Levantar_Json_Turnos());
+	listaArray.put(Levantar_Json_Cliente());
+	listaArray.put(Levantar_Json_Profesor());
+	listaArray.put(Levantar_Json_Turnos());
 	
 	String repuesta = listaArray.toString();
 	JSONArray arregloJson = new JSONArray(repuesta);
@@ -563,6 +644,31 @@ public class GYM {
 	System.out.println(arregloJson);
 	
 }
+	//endregion
+
+	//region FUNCIONES CONTABILIDAD
+
+	public void listar(){
+		//muestro los movimientos
+		System.out.println("Registro de movimientos de " + contabilidad.nombre);
+		contabilidad.movimientos.forEach(
+				(k,v)->{
+					System.out.println(k.format(contabilidad.formatter) + " = $" + v );
+				}
+		);
+	}
+	public void cierreCaja(){
+		//actualizo caja
+		contabilidad.initBilletera();
+
+		//Reinicio el map
+		Set<LocalDate> set = new HashSet<>();
+		set.add(contabilidad.fechaHoy);
+		contabilidad.movimientos.keySet().removeAll(set);
+
+		//Aumento el dia
+		contabilidad.fechaHoy.plusDays(1);
+	}
 	//endregion
 
 	
